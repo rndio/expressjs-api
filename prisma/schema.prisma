@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  username String  @id @db.VarChar(30)
+  password String  @db.VarChar(60)
+  name     String  @db.VarChar(60)
+  token    String? @db.VarChar(60)
+
+  @@map("users")
+}
+
+model Contact {
+  id      Int     @id @default(autoincrement())
+  name    String? @db.VarChar(100)
+  email   String? @db.VarChar(100)
+  message String  @db.Text
+  created_at DateTime @default(now())
+
+  @@map("contacts")
+}
+
+model Project_Category {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(100)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  projects   Project[]
+
+  @@map("project_categories")
+}
+
+model Project {
+  id               Int                @id @default(autoincrement())
+  title            String             @db.VarChar(100)
+  description      String             @db.Text
+  image            String             @db.VarChar(100)
+  link             String             @db.VarChar(100)
+  link_github      String             @db.VarChar(100)
+  is_featured      Boolean            @default(false)
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+  category_id      Int
+  Project_Category Project_Category   @relation(fields: [category_id], references: [id])
+  Projet_Techstack Projet_Techstack[]
+
+  @@map("projects")
+}
+
+model Techstack {
+  id               Int                @id @default(autoincrement())
+  name             String             @db.VarChar(100)
+  image            String             @db.VarChar(100)
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+  Projet_Techstack Projet_Techstack[]
+
+  @@map("techstacks")
+}
+
+model Projet_Techstack {
+  project_id   Int       @db.Int
+  techstack_id Int       @db.Int
+  Project      Project   @relation(fields: [project_id], references: [id])
+  Techstack    Techstack @relation(fields: [techstack_id], references: [id])
+
+  @@id([project_id, techstack_id])
+  @@map("project_techstacks")
+}
